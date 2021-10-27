@@ -53,6 +53,7 @@ mod error;
 pub mod file;
 pub mod file_operations;
 pub mod gpio;
+pub mod hw_random;
 pub mod irq;
 pub mod miscdev;
 pub mod pages;
