@@ -266,6 +266,50 @@ impl<const SIZE: usize> IoMem<SIZE> {
     );
 }
 
+/// Copy memory block from IO memory into buffer.
+///
+/// # Examples
+/// ```
+/// use kernel::io_mem::{self, IoMem, Resource};
+///
+/// fn test(res: Resource) -> Result {
+///     // Create an io mem block of at least 100 bytes.
+///     let mem = unsafe { IoMem::<100>::try_new(res) }?;
+///
+///     let buffer: [i8; 32] = [0; 32];
+///
+///     // Memcpy 16 bytes from offset 10 of io mem block into the buffer.
+///     io_mem::try_memcpy_fromio(mem, buffer, 10, 16)?;
+///
+///     Ok(())
+/// ```
+pub fn try_memcpy_fromio<const SIZE: usize>(
+    iomem: &IoMem<SIZE>,
+    data: &mut [i8],
+    offset: usize,
+    count: usize,
+) -> Result {
+    if !IoMem::<SIZE>::offset_ok::<u8>(offset) {
+        return Err(Error::EINVAL);
+    }
+
+    // Check if memory block can be copied from io region
+    // and also whether it will fit into data buffer.
+    if count > data.len() || count > SIZE - offset {
+        return Err(Error::EINVAL);
+    }
+
+    let ptr = iomem.ptr.wrapping_add(offset);
+
+    // SAFETY:
+    //   - The type invariants guarantee that `ptr` is a valid pointer.
+    //   - The `offset_ok` check returns an error if `offset` would make the write
+    //     go out of bounds (including the type size).
+    //   - the sizes of from/to buffers are asserted whether they match `count` above.
+    unsafe { bindings::memcpy_fromio(data.as_mut_ptr() as _, ptr as _, count.try_into()?) };
+    Ok(())
+}
+
 impl<const SIZE: usize> Drop for IoMem<SIZE> {
     fn drop(&mut self) {
         // SAFETY: By the type invariant, `self.ptr` is a value returned by a previous successful
