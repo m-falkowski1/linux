@@ -3,6 +3,9 @@
 #include <linux/bug.h>
 #include <linux/build_bug.h>
 #include <linux/clk.h>
+#include <linux/delay.h>
+#include <linux/ktime.h>
+#include <linux/kernel.h>
 #include <linux/uaccess.h>
 #include <linux/sched/signal.h>
 #include <linux/gfp.h>
@@ -21,6 +24,26 @@
 __noreturn void rust_helper_BUG(void)
 {
 	BUG();
+}
+
+void rust_helper_usleep_range(unsigned long min, unsigned long max)
+{
+	usleep_range(min, max);
+}
+
+void rust_helper_might_sleep(void)
+{
+	might_sleep();
+}
+
+int rust_helper_ktime_compare(const ktime_t cmp1, const ktime_t cmp2)
+{
+	return ktime_compare(cmp1, cmp2);
+}
+
+ktime_t rust_helper_ktime_add_us(const ktime_t kt, const u64 usec)
+{
+	return ktime_add_us(kt, usec);
 }
 
 int rust_helper_clk_prepare_enable(struct clk *clk)
