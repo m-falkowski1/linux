@@ -7,10 +7,10 @@
 use alloc::{boxed::Box, slice::from_raw_parts_mut};
 
 use crate::{
-    bindings, c_types, from_kernel_result, str::CStr, types::PointerWrapper, Error, Result,
+    bindings, c_types, error::from_kernel_result, str::CStr, types::PointerWrapper, Error, Result,
 };
 
-use core::{cell::UnsafeCell, marker::PhantomData, ops::Deref, pin::Pin};
+use core::{cell::UnsafeCell, marker::PhantomData, pin::Pin};
 
 /// This trait is implemented in order to provide callbacks to `struct hwrng`.
 pub trait HwrngOperations: Sized + 'static {
