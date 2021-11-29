@@ -6,7 +6,11 @@
 
 #![allow(dead_code)]
 
-use crate::{bindings, Error, Result};
+use crate::{
+    bindings
+    platdev::{self, PlatformDevice},
+    Error, Result,
+};
 use core::convert::TryInto;
 
 /// Represents a memory resource.
@@ -162,6 +166,14 @@ impl<const SIZE: usize> IoMem<SIZE> {
             // also 8-byte aligned because we checked it above.
             Ok(Self { ptr: addr as usize })
         }
+    }
+
+    // TODO: Handle Drop properly
+    pub fn try_platform_ioremap_resource(pdev: &mut PlatformDevice, index: u32) -> Result<Self> {
+        let raw_ptr = platdev::devm_platform_ioremap_resource(pdev, index)?;
+        Ok(Self {
+            ptr: raw_ptr as usize,
+        })
     }
 
     const fn offset_ok<T>(offset: usize) -> bool {

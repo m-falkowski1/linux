@@ -8,7 +8,7 @@
 
 use crate::{
     bindings, c_types, device,
-    error::{from_kernel_result, Error, Result},
+    error::{from_kernel_err_ptr, from_kernel_result, Error, Result},
     of::OfMatchTable,
     str::CStr,
     types::PointerWrapper,
@@ -30,6 +30,15 @@ unsafe impl device::RawDevice for PlatformDevice {
         // SAFETY: By the type invariants, we know that `self.ptr` is non-null and valid.
         unsafe { &mut (*self.0).dev }
     }
+}
+
+/// Ioremaps resources of a platform device.
+pub fn devm_platform_ioremap_resource(
+    pdev: &mut PlatformDevice,
+    index: u32,
+) -> Result<*mut c_types::c_void> {
+    // SAFETY: `pdev` is valid by the type invariant.
+    unsafe { from_kernel_err_ptr(bindings::devm_platform_ioremap_resource(pdev.0, index)) }
 }
 
 /// A registration of a platform device.
