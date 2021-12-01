@@ -56,6 +56,7 @@ pub mod file;
 pub mod file_operations;
 pub mod gpio;
 pub mod irq;
+pub mod ktime;
 pub mod miscdev;
 pub mod mm;
 pub mod pages;
