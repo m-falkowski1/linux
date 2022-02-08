@@ -10,7 +10,8 @@ use crate::{
     bindings, c_types,
     device::{self, RawDevice},
     driver,
-    error::{from_kernel_result, Result},
+    error::{from_kernel_result, Error, Result},
+    io_mem::{IoMem, IoResource, Resource},
     of,
     str::CStr,
     to_result,
@@ -179,6 +180,36 @@ impl Device {
     pub fn id(&self) -> i32 {
         // SAFETY: By the type invariants, we know that `self.ptr` is non-null and valid.
         unsafe { (*self.ptr).id }
+    }
+
+    /// Gets a system resources of a platform device.
+    pub fn get_resource(&self, rtype: IoResource, num: usize) -> Option<Resource> {
+        // SAFETY: `self.ptr` is valid by the type invariant.
+        let res = unsafe { bindings::platform_get_resource(self.ptr, rtype as _, num as _) };
+        if res.is_null() {
+            return None;
+        }
+
+        // SAFETY: The pointer `res` is returned from `bindings::platform_get_resource`
+        // above and checked if it is not a NULL.
+        unsafe { Resource::new((*res).start, (*res).end) }
+    }
+
+    /// Ioremaps resources of a platform device.
+    ///
+    /// # Safety
+    ///
+    /// Satisfy a safety requirements of the `IoMem<SIZE>::try_new` method.
+    /// Callers must ensure that either (a) the resulting interface cannot be used to initiate DMA
+    /// operations, or (b) that DMA operations initiated via the returned interface use DMA handles
+    /// allocated through the `dma` module.
+    pub unsafe fn ioremap_resource<const SIZE: usize>(&self, index: usize) -> Result<IoMem<SIZE>> {
+        if let Some(res) = self.get_resource(IoResource::Mem, index) {
+            // SAFETY: Valid by the safety contract.
+            unsafe { IoMem::<SIZE>::try_new(res) }
+        } else {
+            Err(Error::EINVAL)
+        }
     }
 }
 
