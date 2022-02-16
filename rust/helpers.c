@@ -22,6 +22,7 @@
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/ktime.h>
+#include <linux/kernel.h>
 #include <linux/uaccess.h>
 #include <linux/sched/signal.h>
 #include <linux/gfp.h>
@@ -80,6 +81,12 @@ void rust_helper_usleep_range(unsigned long min, unsigned long max)
 	usleep_range(min, max);
 }
 EXPORT_SYMBOL_GPL(rust_helper_usleep_range);
+
+void rust_helper_might_sleep(void)
+{
+	might_sleep();
+}
+EXPORT_SYMBOL_GPL(rust_helper_might_sleep);
 
 int rust_helper_ktime_compare(const ktime_t cmp1, const ktime_t cmp2)
 {
