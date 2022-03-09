@@ -59,6 +59,7 @@ pub mod irq;
 pub mod miscdev;
 pub mod mm;
 pub mod pages;
+pub mod pm_runtime;
 pub mod power;
 pub mod revocable;
 pub mod security;
