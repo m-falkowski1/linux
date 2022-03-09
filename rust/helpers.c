@@ -20,6 +20,7 @@
 #include <linux/bug.h>
 #include <linux/build_bug.h>
 #include <linux/clk.h>
+#include <linux/delay.h>
 #include <linux/uaccess.h>
 #include <linux/sched/signal.h>
 #include <linux/gfp.h>
@@ -41,6 +42,12 @@ __noreturn void rust_helper_BUG(void)
 	BUG();
 }
 EXPORT_SYMBOL_GPL(rust_helper_BUG);
+
+void rust_helper_usleep_range(unsigned long min, unsigned long max)
+{
+	usleep_range(min, max);
+}
+EXPORT_SYMBOL_GPL(rust_helper_usleep_range);
 
 void rust_helper_clk_disable_unprepare(struct clk *clk)
 {
